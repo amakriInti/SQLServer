@@ -123,3 +123,57 @@ from ChambreGroupeChambre cgc
 inner join Chambre c on c.Id = cgc.Chambre
 inner join GroupeChambre gc on gc.Id=cgc.GroupeChambre
 
+CREATE PROC Employe_Insert( 
+		@nom nvarchar(MAX), @prenom nvarchar(MAX), @etat uniqueidentifier, @commentaire nvarchar(MAX), 
+		@vitesse tinyint, @hotel uniqueidentifier)
+AS
+DECLARE @id uniqueidentifier
+Insert into Employe(Nom, Prenom, Etat, Commentaire, Vitesse) values(@nom, @prenom, @etat, @commentaire, @vitesse)
+select @id=Id from Employe where ModifiedDate = (select MAX(ModifiedDate) from Employe)
+IF @hotel IS NOT NULL
+  BEGIN
+  insert HotelEmploye(Employe, Hotel) values(@id, @hotel)
+  END
+GO
+
+ALTER PROC Employe_Insert(@data xml)
+AS
+-- Récupérer les variables
+DECLARE @nom nvarchar(MAX)
+DECLARE @prenom nvarchar(MAX)
+DECLARE @etat uniqueidentifier
+select 
+	@nom = 	A.B.value('nom[1]', 'nvarchar(MAX)'),
+	@prenom = 	A.B.value('prenom[1]', 'nvarchar(MAX)'),
+	@etat = 	A.B.value('etat[1]', 'uniqueidentifier')
+from 
+	@data.nodes('employe') A(B)
+
+select 
+	@etat = 	A.B.value('nom[1]', 'uniqueidentifier')
+from 
+	@data.nodes('employe/hotels/hotel') A(B)
+
+
+-- Exécution
+DECLARE @id uniqueidentifier
+Insert into Employe(Nom, Prenom, Etat, Commentaire, Vitesse) values(@nom, @prenom, @etat, @commentaire, @vitesse)
+select @id=Id from Employe where ModifiedDate = (select MAX(ModifiedDate) from Employe)
+IF @hotel IS NOT NULL
+  BEGIN
+  insert HotelEmploye(Employe, Hotel) values(@id, @hotel)
+  END
+GO
+
+Exec Employe_Insert 
+	'<employe>
+		<nom>Dupont</nom>
+		<prenom>Pierre</prenom>
+		<etat>A7C8AD2D-A20C-478B-AF31-4AA7E5AB6917</etat>
+		<commentaire>NULL</commentaire>
+		<vitesse>2</vitesse>
+		<hotels>
+			<hotel>A7C8AD2D-A20C-478B-AF31-4AA7E5AB6917</hotel>
+			<hotel>4CE93CD3-506D-4D54-B01A-4FE617DA5D78</hotel>
+		</hotels>
+	</employe>'
