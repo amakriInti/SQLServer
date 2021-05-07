@@ -1,0 +1,5 @@
+-- Base de données Aventure 
+-- Table Produit 
+-- Table Categorie
+-- Intégrité référentiel
+-- Requête : liste des produits de la catégorie Informatique

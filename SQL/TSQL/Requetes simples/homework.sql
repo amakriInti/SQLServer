@@ -1,0 +1,3 @@
+-- Création de base de données : Article - Stock
+-- Proc stockées : Ajout Article - Supprimer article
+-- Application console ADO.Net Ajouter - Supprimer
